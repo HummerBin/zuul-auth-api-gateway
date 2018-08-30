@@ -3,6 +3,7 @@ server:
 
 zuul:
   routes:
+    #路由别名，无其他意义
     auth-center:
       path: /login/**
       url: http://127.0.0.1:8081/
