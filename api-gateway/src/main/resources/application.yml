@@ -12,8 +12,15 @@ zuul:
       stripPrefix: false
     backend-service:
       path: /backend/**
+      #url可以用serviceId服务id替换
       url: http://127.0.0.1:8082/
+#加入服务注册中心
+eureka:
+    client:
+      serviceUrl:
+          defaultZone: http://localhost:1111/eureka/
+spring:
+  application:
+    name: api_gateway
 
 zhph.security.jwt.secret: otherpeopledontknowit
-
-
