@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,30 +40,10 @@ public class CustomSecurityConfig extends WebSecurityConfigurerAdapter {
         return new CustomFilterInvocationSecurityMetadataSource();
     }
 
-//    @Override
-//    protected void configure(HttpSecurity httpSecurity) throws Exception {
-//        //httpSercurity 使用参考
-//        //https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/config/annotation/web/builders/HttpSecurity.html
-//        httpSecurity
-//                .csrf().disable()
-//                .logout().disable()
-//                .formLogin().disable()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                    .anonymous()
-//                .and()
-//                    .exceptionHandling().authenticationEntryPoint(
-//                            (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-//                .and()
-//                //允许在一个已知的filter之后添加filter UsernamePasswordAuthenticationFilter是已知filter
-//                    .addFilterAfter(new JwtTokenAuthenticationFilter(config),
-//                            UsernamePasswordAuthenticationFilter.class)
-//                .authorizeRequests()
-//                    .antMatchers(config.getUrl()).permitAll()
-//                    .antMatchers("/backend/admin").hasRole("ADMIN")
-//                    .antMatchers("/backend/user").hasRole("USER")
-//                    .antMatchers("/backend/guest").permitAll();
-//    }
+    @Bean
+    public AccessDecisionManager accessDecisionManager() {
+        return new CustomAccessDecisionManager();
+    }
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         //httpSercurity 使用参考
@@ -89,7 +70,9 @@ public class CustomSecurityConfig extends WebSecurityConfigurerAdapter {
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
                     @Override
                     public <O extends FilterSecurityInterceptor> O postProcess(O object) {
+                        //设置了自定义权限资源后，还必须设置自定义权限决策，否则会进入默认决策，导致访问拒绝
                         object.setSecurityMetadataSource(securityMetadataSource());
+                        object.setAccessDecisionManager(accessDecisionManager());
                         return object;
                     }
                 });
